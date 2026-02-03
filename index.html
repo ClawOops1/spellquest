@@ -48,6 +48,17 @@
             position: relative;
         }
 
+        @media (max-height: 600px) {
+            #arena {
+                transform: translateY(-20px);
+                margin: 5px 0;
+            }
+            #word-display {
+                transform: translateY(-30px);
+                margin: 10px 0;
+            }
+        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -183,6 +194,25 @@
         }
 
         .btn-icon { font-size: 1.5rem; margin-bottom: 5px; }
+
+        /* --- Word History List --- */
+        #history-container {
+            margin: 10px 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        #word-history {
+            width: 80%;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 5px;
+            border: 2px solid #333;
+            background: #fff;
+        }
+
+        .word-untested { color: #333; }
+        .word-tested { color: var(--success-color); }
 
         /* --- Energy/XP Bar --- */
         #xp-container {
@@ -321,6 +351,12 @@
 
     <div id="word-display">
         <!-- Spans injected here -->
+    </div>
+
+    <div id="history-container">
+        <select id="word-history">
+            <option value="">-- Tested Words --</option>
+        </select>
     </div>
 
     <div id="controls">
@@ -614,6 +650,7 @@ class Game {
         this.typedWord = "";
         this.heroHP = 100;
         this.enemyHP = 100;
+        this.testedWords = new Set(); // Track unique tested words
         
         // DOM Cache
         this.dom = {
@@ -630,7 +667,8 @@ class Game {
             modal: document.getElementById('modal-overlay'),
             modalTitle: document.getElementById('modal-title'),
             modalMsg: document.getElementById('modal-message'),
-            kbTrigger: document.getElementById('keyboard-trigger')
+            kbTrigger: document.getElementById('keyboard-trigger'),
+            history: document.getElementById('word-history')
         };
 
         this.init();
@@ -704,6 +742,7 @@ class Game {
         this.updateHealthUI();
         this.renderWord();
         this.updateStats();
+        this.updateHistoryList();
 
         // Reset input
         this.dom.input.value = "";
@@ -713,6 +752,21 @@ class Game {
         setTimeout(() => this.speakWord(), 500);
 
         this.state = STATES.PLAYING;
+    }
+
+    updateHistoryList() {
+        const list = this.getWordList();
+        this.dom.history.innerHTML = '<option value="">-- Word List --</option>';
+        list.forEach(word => {
+            const opt = document.createElement('option');
+            opt.value = word;
+            opt.innerText = word;
+            if (this.testedWords.has(word)) {
+                opt.style.color = "var(--success-color)";
+                opt.innerText += " (✓)";
+            }
+            this.dom.history.appendChild(opt);
+        });
     }
 
     renderWord() {
@@ -822,6 +876,9 @@ class Game {
         this.state = STATES.LOCKED;
         this.showFloatingText(this.dom.heroSprite, "VICTORY!", "gold");
         
+        // Mark as tested
+        this.testedWords.add(this.currentWord);
+        
         // XP Gain
         this.xp += CONFIG.xpPerWord;
         this.score += 100;
@@ -867,7 +924,8 @@ class Game {
 
     // --- Actions ---
     speakWord() {
-        const u = new SpeechSynthesisUtterance(this.currentWord);
+        const wordPrompt = `The word is: ${this.currentWord}. ${this.currentWord}.`;
+        const u = new SpeechSynthesisUtterance(wordPrompt);
         u.rate = 0.8;
         window.speechSynthesis.speak(u);
         this.dom.input.focus();
