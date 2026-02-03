@@ -3,299 +3,740 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SpellQuest: The Great Library 🛡️🐝</title>
+    <title>SpellQuest: Epic Spelling Adventure</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d0221;
-            --panel: #240b36;
-            --text: #c31432;
-            --gold: #fcc200;
-            --success: #00ff87;
-            --hero-glow: #00d2ff;
+            --bg-color-lvl1: #87CEEB; /* Sky Blue */
+            --bg-color-lvl2: #FFB6C1; /* Light Pink */
+            --bg-color-lvl3: #9370DB; /* Medium Purple */
+            --bg-color-lvl4: #2F4F4F; /* Dark Slate Gray */
+            --text-color: #333;
+            --accent-color: #FFD700;
+            --danger-color: #FF6347;
+            --success-color: #32CD32;
         }
-        * { box-sizing: border-box; font-family: 'Press Start 2P', cursive; }
+
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation; /* Improves touch response */
+        }
+
         body {
-            margin: 0; background: var(--bg); color: #fff;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; overflow: hidden; touch-action: manipulation;
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--bg-color-lvl1);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow: hidden; /* Prevent scrolling */
+            transition: background-color 1s ease;
         }
-        #game-header {
-            width: 100%; padding: 10px; display: flex; justify-content: space-between;
-            font-size: 8px; background: rgba(0,0,0,0.5); border-bottom: 2px solid var(--gold);
-        }
-        #game-stage {
-            width: 100%; max-width: 500px; height: 30vh;
-            background: linear-gradient(to bottom, #0d0221, #240b36); 
-            position: relative; display: flex; justify-content: space-around; 
-            align-items: flex-end; padding-bottom: 20px;
-            transition: background 1s;
-        }
-        .actor { font-size: 50px; transition: all 0.2s; position: relative; z-index: 2; }
-        #hero { filter: drop-shadow(0 0 15px var(--hero-glow)); }
-        
-        .hp-bar-container {
-            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-            width: 50px; height: 6px; background: #333; border: 1px solid #fff;
-        }
-        .hp-fill { width: 100%; height: 100%; background: #ff2e63; transition: width 0.3s; }
-        
-        #energy-container {
-            width: 90%; height: 10px; background: #222; border: 2px solid var(--gold);
-            margin: 10px 0; border-radius: 5px; overflow: hidden;
-        }
-        #energy-fill { width: 0%; height: 100%; background: var(--gold); transition: width 0.5s; }
 
-        #ui-panel {
-            flex-grow: 1; width: 100%; max-width: 500px;
-            padding: 15px; display: flex; flex-direction: column; align-items: center;
-            background: var(--panel); border-top: 4px solid var(--gold);
+        /* --- UI Layout --- */
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            position: relative;
         }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stats-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #hearts-container {
+            color: var(--danger-color);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        /* --- Battle Arena --- */
+        #arena {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .character {
+            font-size: 3rem;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        #hero { transform: scaleX(-1); } /* Face right */
+        
+        .health-bar-container {
+            width: 80px;
+            height: 10px;
+            background: #555;
+            border: 2px solid #000;
+            margin-top: 5px;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            background: var(--success-color);
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        .shake { animation: shake 0.5s; }
+        .attack-anim { animation: lunge 0.3s; }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        @keyframes lunge {
+            0% { transform: scaleX(-1) translateX(0); }
+            50% { transform: scaleX(-1) translateX(-50px); }
+            100% { transform: scaleX(-1) translateX(0); }
+        }
+
+        /* --- Word Display --- */
         #word-display {
-            font-size: 18px; color: var(--gold); letter-spacing: 4px;
-            margin: 15px 0; min-height: 25px; text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 40px;
+            text-shadow: 2px 2px 0 #fff;
         }
-        .letter-box {
-            display: inline-block; width: 20px; border-bottom: 3px solid #fff;
-            margin: 0 3px; text-align: center;
-        }
-        .letter-box.typed { color: var(--success); border-bottom-color: var(--success); }
-        .letter-box.wrong { color: var(--text); animation: shake 0.2s; }
 
-        #hint-text { font-size: 10px; color: #aaa; margin-bottom: 10px; min-height: 12px; }
-        
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-        button {
-            padding: 12px 5px; font-size: 7px; border: none; background: #43115b;
-            color: #fff; border: 2px solid var(--gold); cursor: pointer;
+        .letter-slot {
+            display: inline-block;
+            border-bottom: 3px solid #333;
+            min-width: 20px;
+            margin: 0 2px;
         }
-        button:active { background: var(--gold); color: #000; }
-        
-        #mobile-input { position: absolute; opacity: 0; pointer-events: none; }
 
-        #lvl-up-screen {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            z-index: 100; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--gold); text-align: center;
+        .letter-slot.filled { border-bottom: none; }
+        .letter-slot.hint { color: #555; opacity: 0.6; }
+
+        /* --- Controls --- */
+        #controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        .btn {
+            background: #fff;
+            border: 4px solid #333;
+            box-shadow: 4px 4px 0 #333;
+            padding: 15px 5px;
+            font-family: inherit;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            active: transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #333;
+        }
+
+        .btn-icon { font-size: 1.5rem; margin-bottom: 5px; }
+
+        /* --- Energy/XP Bar --- */
+        #xp-container {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border: 2px solid #fff;
+            margin-top: auto; /* Push to bottom */
+            position: relative;
+        }
+
+        #xp-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+
+        #xp-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.6rem;
+            color: #000;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* --- Hidden Input for Mobile Keyboard --- */
+        #hidden-input {
+            position: absolute;
+            opacity: 0;
+            top: -1000px;
+        }
+        
+        /* Mobile keyboard keep-alive overlay */
+        #keyboard-trigger {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            display: none; /* Shown only when needed */
+        }
+
+        /* --- Modal --- */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #modal-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border: 4px solid #333;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .modal-title {
+            color: var(--danger-color);
+            margin-bottom: 15px;
+        }
+        
+        .modal-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: inherit;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Feedback text floating */
+        .feedback {
+            position: absolute;
+            font-size: 1.2rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s forwards;
+            z-index: 20;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+
     </style>
 </head>
-<body onclick="focusInput()">
-    <input type="text" id="mobile-input" autocomplete="off" autocapitalize="off">
+<body>
+
+<div id="game-container">
+    <header>
+        <div class="stats-box">
+            <span>LVL <span id="level-display">1</span></span>
+        </div>
+        <div class="stats-box">
+            <div id="hearts-container">❤️❤️❤️</div>
+        </div>
+        <div class="stats-box">
+            <span>Score: <span id="score-display">0</span></span>
+        </div>
+    </header>
+
+    <div id="arena">
+        <div id="hero" class="character">
+            <div id="hero-sprite">🐝</div>
+            <div class="health-bar-container"><div id="hero-hp" class="health-bar-fill"></div></div>
+        </div>
+        <div id="enemy" class="character">
+            <div id="enemy-sprite">👾</div>
+            <div class="health-bar-container"><div id="enemy-hp" class="health-bar-fill"></div></div>
+        </div>
+    </div>
+
+    <div id="word-display">
+        <!-- Spans injected here -->
+    </div>
+
+    <div id="controls">
+        <button class="btn" id="btn-speak" onclick="game.speakWord()">
+            <span class="btn-icon">🔊</span>
+            Word
+        </button>
+        <button class="btn" id="btn-peek" onclick="game.peek()">
+            <span class="btn-icon">👁️</span>
+            Peek
+        </button>
+        <button class="btn" id="btn-story" onclick="game.speakDefinition()">
+            <span class="btn-icon">📖</span>
+            Story
+        </button>
+    </div>
+
+    <div id="xp-container">
+        <div id="xp-fill"></div>
+        <div id="xp-text">ENERGY (LEVEL UP)</div>
+    </div>
     
-    <div id="game-header">
-        <span>LVL:<span id="lvl-val">1</span></span>
-        <span id="lives-val">❤️❤️❤️</span>
-        <span>XP:<span id="xp-val">0</span></span>
+    <!-- Hidden input to capture mobile keyboard -->
+    <input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div id="keyboard-trigger"></div>
+</div>
+
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" id="modal-title">GAME OVER</h2>
+        <p id="modal-message">Try again?</p>
+        <button class="modal-btn" onclick="game.resetGame()">RESTART</button>
     </div>
+</div>
 
-    <div id="game-stage">
-        <div id="hero" class="actor">🐝
-            <div class="hp-bar-container"><div id="hero-hp" class="hp-fill"></div></div>
-        </div>
-        <div id="monster" class="actor">👾
-            <div class="hp-bar-container"><div id="monster-hp" class="hp-fill"></div></div>
-        </div>
-    </div>
+<script>
+/**
+ * SpellQuest Game Logic
+ * 
+ * Features:
+ * - Robust State Machine (STATES object) to prevent race conditions.
+ * - Adaptive difficulty based on levels.
+ * - Mobile-first keyboard handling.
+ */
 
-    <div id="energy-container"><div id="energy-fill"></div></div>
+// --- Data ---
+const WORD_LISTS = {
+    grade3: ["unicorn", "pirates", "leaning", "acrobat", "forepaw", "recipe", "mermaid", "incredible", "nervous", "raise", "attacked", "streetlights", "shouting", "dinosaur", "gorgeous", "avocado", "formation", "faraway", "understand", "breakfast", "message", "elephant", "garbage", "bombarded", "leather", "peppercorn", "weather", "turnout", "journey", "asleep", "brilliant", "monsoon", "valentine", "especially", "heater", "wooden", "window", "chocolate", "hedgehog", "surprise", "disability", "countess", "cartwheel", "zooming", "eaten", "courtyard", "curious", "vacuum", "dangerous", "February"],
+    grade4: ["hesitate", "fragments", "ration", "frustration", "aroma", "perfume", "discoveries", "prognosis", "gallop", "fluently", "sardines", "rickety", "porridge", "beige", "gaunt", "nautical", "foreign", "scorcher", "deflated", "cosmetics", "unruly", "moustache", "sinister", "lurches", "Buffalo", "fabulous", "mysterious", "anguish", "lilt", "democracy", "ancestral", "enormous", "dubious", "scavenger", "unleash", "crawdad", "mascot", "artifacts", "tuxedo", "language", "sequins", "lanky", "brandished", "conical", "pediatric", "rummage", "grimace", "geranium", "ebony", "paltry"],
+    grade5: ["verdict", "imitation", "preamble", "commotion", "steeple", "suspicious", "fugitive", "nomad", "Berlin", "bracken", "rakish", "gusto", "jeered", "galore", "eccentric", "hippies", "pistachio", "garbled", "miniature", "plausible", "oblivion", "spectators", "parchment", "heron", "billowed", "lunacy", "noggin", "hypnosis", "toiletries", "winsome", "emporium", "savant", "samosas", "mosque", "encourages", "receptionist", "reprimanding", "immigrants", "lanyards", "ramshackle", "dissolving", "skewer", "conjure", "neon", "rotunda", "gleaned", "prattling", "atrium", "almanac", "campaign"],
+    grade6: ["zombielike", "convulsively", "graffitist", "cavorting", "battlements", "khaki", "Yiddish", "equestrian", "manticores", "guttural", "sans serif", "Frankenstein", "vidimus", "archipelago", "pinioning", "galleon", "wainscoting", "warlock", "dimensional", "Everest", "marauder", "deferential", "opalescent", "talcum", "plaited", "prestigious", "lo mein", "psyche", "schema", "delphine", "serape", "chignon", "magnanimous", "Nehru", "colossus", "garishly", "dexterity", "conscience", "albatross", "asphalt", "tranquilizer", "monsieur", "fraidycat", "courier", "stucco", "et cetera", "slough", "puissance", "pheromone", "chartreuse"]
+};
 
-    <div id="ui-panel">
-        <div id="hint-text"></div>
-        <div id="word-display"></div>
+// --- Definitions (Mocked for simplicity, ideally fetched or expanded) ---
+// In a real app, you'd use a dictionary API. Here we use a generic placeholder if missing.
+const DEFINITIONS = {
+    "unicorn": "A mythical horse with a single horn.",
+    "pirates": "Sailors who attack other ships.",
+    "dinosaur": "A large reptile from prehistoric times.",
+    // Fallback logic used in code
+};
+
+// --- Game State Constants ---
+const STATES = {
+    IDLE: 'IDLE',          // Waiting for user to start or between rounds
+    PLAYING: 'PLAYING',    // Active typing
+    LOCKED: 'LOCKED',      // Processing animation/transition (ignore input)
+    GAMEOVER: 'GAMEOVER'   // Dead state
+};
+
+// --- Configuration ---
+const CONFIG = {
+    xpToLevel: 100,
+    xpPerWord: 20,
+    xpPenaltyPeek: 10,
+    damagePerHit: 20, // Enemy takes 5 hits
+    heroDamage: 25,   // Hero takes 4 hits
+    maxHearts: 3
+};
+
+class Game {
+    constructor() {
+        this.state = STATES.IDLE;
+        this.level = 1;
+        this.score = 0;
+        this.hearts = CONFIG.maxHearts;
+        this.xp = 0;
+        this.currentWord = "";
+        this.typedWord = "";
+        this.heroHP = 100;
+        this.enemyHP = 100;
         
-        <div class="controls">
-            <button onclick="speakWord()">🔊 HEAR WORD</button>
-            <button onclick="speakSentence()">📖 HEAR STORY</button>
-            <button onclick="peekWord()" style="grid-column: span 2; background: #1a1a2e;">👁️ PEEK (Uses 10 XP)</button>
-        </div>
-    </div>
-
-    <div id="lvl-up-screen" onclick="closeLvlUp()">
-        <h1 style="font-size:24px;">LEVEL UP!</h1>
-        <div id="lvl-up-icon" style="font-size:80px; margin:20px;">⚡</div>
-        <p id="lvl-up-msg">You evolved! Harder words await!</p>
-        <p style="font-size:8px; margin-top:30px;">(Tap to continue)</p>
-    </div>
-
-    <script>
-        const ALL_WORDS = {
-            1: ["unicorn", "pirates", "leaning", "acrobat", "forepaw", "recipe", "mermaid", "incredible", "nervous", "raise", "attacked", "streetlights", "shouting", "dinosaur", "gorgeous", "avocado", "formation", "faraway", "understand", "breakfast", "message", "elephant", "garbage", "bombarded", "leather", "peppercorn", "weather", "turnout", "journey", "asleep", "brilliant", "monsoon", "valentine", "especially", "heater", "wooden", "window", "chocolate", "hedgehog", "surprise", "disability", "countess", "cartwheel", "zooming", "eaten", "courtyard", "curious", "vacuum", "dangerous", "February"],
-            2: ["hesitate", "fragments", "ration", "frustration", "aroma", "perfume", "discoveries", "prognosis", "gallop", "fluently", "sardines", "rickety", "porridge", "beige", "gaunt", "nautical", "foreign", "scorcher", "deflated", "cosmetics", "unruly", "moustache", "sinister", "lurches", "Buffalo", "fabulous", "mysterious", "anguish", "lilt", "democracy", "ancestral", "enormous", "dubious", "scavenger", "unleash", "crawdad", "mascot", "artifacts", "tuxedo", "language", "sequins", "lanky", "brandished", "conical", "pediatric", "rummage", "grimace", "geranium", "ebony", "paltry"],
-            3: ["verdict", "imitation", "preamble", "commotion", "steeple", "suspicious", "fugitive", "nomad", "Berlin", "bracken", "rakish", "gusto", "jeered", "galore", "eccentric", "hippies", "pistachio", "garbled", "miniature", "plausible", "oblivion", "spectators", "parchment", "heron", "billowed", "lunacy", "noggin", "hypnosis", "toiletries", "winsome", "emporium", "savant", "samosas", "mosque", "encourages", "receptionist", "reprimanding", "immigrants", "lanyards", "ramshackle", "dissolving", "skewer", "conjure", "neon", "rotunda", "gleaned", "prattling", "atrium", "almanac", "campaign"],
-            4: ["zombielike", "convulsively", "graffitist", "cavorting", "battlements", "khaki", "Yiddish", "equestrian", "manticores", "guttural", "sans serif", "Frankenstein", "vidimus", "archipelago", "pinioning", "galleon", "wainscoting", "warlock", "dimensional", "Everest", "marauder", "deferential", "opalescent", "talcum", "plaited", "prestigious", "lo mein", "psyche", "schema", "delphine", "serape", "chignon", "magnanimous", "Nehru", "colossus", "garishly", "dexterity", "conscience", "albatross", "asphalt", "tranquilizer", "monsieur", "fraidycat", "courier", "stucco", "et cetera", "slough", "puissance", "pheromone", "chartreuse"]
+        // DOM Cache
+        this.dom = {
+            input: document.getElementById('hidden-input'),
+            wordDisplay: document.getElementById('word-display'),
+            heroSprite: document.getElementById('hero-sprite'),
+            enemySprite: document.getElementById('enemy-sprite'),
+            heroHP: document.getElementById('hero-hp'),
+            enemyHP: document.getElementById('enemy-hp'),
+            xpFill: document.getElementById('xp-fill'),
+            level: document.getElementById('level-display'),
+            score: document.getElementById('score-display'),
+            hearts: document.getElementById('hearts-container'),
+            modal: document.getElementById('modal-overlay'),
+            modalTitle: document.getElementById('modal-title'),
+            modalMsg: document.getElementById('modal-message'),
+            kbTrigger: document.getElementById('keyboard-trigger')
         };
 
-        let s = {
-            lvl: 1, xp: 0, energy: 0, hp: 100, mHp: 100, lives: 3,
-            busy: false, typed: "", current: "",
-            monsters: ["👾", "👹", "🐉", "👻", "🦇", "🐺", "💀"]
-        };
+        this.init();
+    }
 
-        function speak(t, cb) {
-            window.speechSynthesis.cancel();
-            const m = new SpeechSynthesisUtterance(t);
-            m.rate = 0.85;
-            if (cb) m.onend = cb;
-            window.speechSynthesis.speak(m);
-        }
-
-        function focusInput() { document.getElementById('mobile-input').focus(); }
-
-        function nextWord() {
-            s.busy = false;
-            const grade = Math.min(s.lvl, 4);
-            const list = ALL_WORDS[grade];
-            s.current = list[Math.floor(Math.random() * list.length)];
-            s.typed = "";
-            s.mHp = 100;
-            s.hp = 100;
-            
-            const display = document.getElementById('word-display');
-            display.innerHTML = "";
-            for(let char of s.current) {
-                const b = document.createElement('span');
-                b.className = 'letter-box';
-                b.innerText = "_";
-                display.appendChild(b);
-            }
-
-            const hint = document.getElementById('hint-text');
-            if (s.lvl === 1) hint.innerText = "LOOK: " + s.current.toUpperCase();
-            else if (s.lvl === 2) hint.innerText = "HINT: Starts with " + s.current[0].toUpperCase();
-            else hint.innerText = "LISTEN CLOSELY...";
-
-            updateUI();
-            setTimeout(() => { speak(s.current); }, 500);
-        }
-
-        function updateUI() {
-            document.getElementById('hero-hp').style.width = s.hp + "%";
-            const mhp = document.getElementById('monster-hp');
-            if (mhp) mhp.style.width = s.mHp + "%";
-            
-            document.getElementById('energy-fill').style.width = s.energy + "%";
-            document.getElementById('xp-val').innerText = s.xp;
-            document.getElementById('lvl-val').innerText = s.lvl;
-            document.getElementById('lives-val').innerText = "❤️".repeat(s.lives);
-            
-            const stage = document.getElementById('game-stage');
-            const hero = document.getElementById('hero');
-            if (s.lvl === 1) {
-                stage.style.background = "linear-gradient(to bottom, #0d0221, #240b36)";
-                hero.innerText = "🐝";
-            } else if (s.lvl === 2) {
-                stage.style.background = "linear-gradient(to bottom, #134e5e, #71b280)";
-                hero.innerText = "🐝✨";
-            } else {
-                stage.style.background = "linear-gradient(to bottom, #4b6cb7, #182848)";
-                hero.innerText = "🐝👑";
-            }
-        }
-
-        function handleInput(char) {
-            if (s.busy || s.hp <= 0 || s.mHp <= 0) return;
-            const expected = s.current[s.typed.length].toLowerCase();
-            const input = char.toLowerCase();
-            const boxes = document.querySelectorAll('.letter-box');
-
-            if (input === expected) {
-                boxes[s.typed.length].innerText = s.current[s.typed.length].toUpperCase();
-                boxes[s.typed.length].classList.add('typed');
-                s.typed += char;
-                speak(char);
-                
-                document.getElementById('hero').style.transform = "scale(1.3) translateX(40px)";
-                setTimeout(() => document.getElementById('hero').style.transform = "scale(1) translateX(0)", 150);
-                
-                s.mHp -= (100 / s.current.length);
-                updateUI();
-
-                if (s.typed.length === s.current.length) {
-                    s.busy = true;
-                    setTimeout(victory, 600);
-                }
-            } else if (/^[a-z]$/i.test(char)) {
-                boxes[s.typed.length].classList.add('wrong');
-                setTimeout(() => boxes[s.typed.length].classList.remove('wrong'), 200);
-                
-                document.getElementById('monster').style.transform = "scale(1.3) translateX(-40px)";
-                setTimeout(() => document.getElementById('monster').style.transform = "scale(1) translateX(0)", 150);
-                
-                s.hp -= 20;
-                updateUI();
-                speak("No");
-                
-                if (s.hp <= 0) {
-                    if (s.lives > 1) {
-                        s.lives--;
-                        s.hp = 100;
-                        updateUI();
-                        speak("Heart used!");
-                    } else {
-                        s.lives = 0;
-                        updateUI();
-                        setTimeout(gameOver, 500);
-                    }
-                }
-            }
-        }
-
-        function victory() {
-            s.xp += 10;
-            s.energy += 25;
-            speak("Correct! " + s.current);
-            
-            if (s.energy >= 100) {
-                s.energy = 0;
-                s.lvl++;
-                setTimeout(showLvlUp, 500);
-            } else {
-                setTimeout(() => {
-                    const m = document.getElementById('monster');
-                    m.innerText = s.monsters[Math.floor(Math.random()*s.monsters.length)];
-                    m.innerHTML += '<div class="hp-bar-container"><div id="monster-hp" class="hp-fill"></div></div>';
-                    nextWord();
-                }, 1200);
-            }
-        }
-
-        function showLvlUp() {
-            document.getElementById('lvl-up-screen').style.display = 'flex';
-            speak("Level Up!");
-        }
-
-        function closeLvlUp() {
-            document.getElementById('lvl-up-screen').style.display = 'none';
-            nextWord();
-        }
-
-        function gameOver() {
-            alert("GAME OVER! Back to Level 1.");
-            s.hp = 100; s.lvl = 1; s.lives = 3; s.xp = 0; s.energy = 0;
-            nextWord();
-        }
-
-        function speakWord() { speak(s.current); }
-        function speakSentence() { speak("Spell the word: " + s.current); }
+    init() {
+        // Setup Event Listeners
+        this.dom.input.addEventListener('input', (e) => this.handleInput(e));
         
-        function peekWord() {
-            if (s.xp >= 10 && s.typed.length < s.current.length) {
-                s.xp -= 10;
-                speak("Next is " + s.current[s.typed.length]);
-                updateUI();
-            }
-        }
-
-        document.getElementById('mobile-input').addEventListener('input', (e) => {
-            if (e.target.value.length > 0) {
-                handleInput(e.target.value[e.target.value.length - 1]);
-                e.target.value = "";
+        // Ensure keyboard focus is maintained on click anywhere
+        document.addEventListener('click', () => {
+            if (this.state === STATES.PLAYING) {
+                this.dom.input.focus();
             }
         });
 
-        window.onload = nextWord;
-    </script>
+        // Start game
+        this.startLevel();
+    }
+
+    resetGame() {
+        this.level = 1;
+        this.score = 0;
+        this.hearts = CONFIG.maxHearts;
+        this.xp = 0;
+        this.updateStats();
+        this.dom.modal.classList.remove('visible');
+        this.startLevel();
+    }
+
+    getWordList() {
+        if (this.level <= 3) return WORD_LISTS.grade3;
+        if (this.level <= 5) return WORD_LISTS.grade4;
+        if (this.level <= 7) return WORD_LISTS.grade5;
+        return WORD_LISTS.grade6;
+    }
+
+    getRandomWord() {
+        const list = this.getWordList();
+        return list[Math.floor(Math.random() * list.length)];
+    }
+
+    updateStats() {
+        this.dom.level.innerText = this.level;
+        this.dom.score.innerText = this.score;
+        this.dom.hearts.innerText = "❤️".repeat(this.hearts);
+        
+        // XP Bar
+        let xpPercent = (this.xp / CONFIG.xpToLevel) * 100;
+        this.dom.xpFill.style.width = `${Math.min(xpPercent, 100)}%`;
+
+        // Bee Evolution
+        if (this.level >= 10) this.dom.heroSprite.innerText = "🐝👑";
+        else if (this.level >= 5) this.dom.heroSprite.innerText = "🐝✨";
+        else this.dom.heroSprite.innerText = "🐝";
+
+        // Background Color Evolution
+        if (this.level >= 7) document.body.style.backgroundColor = "var(--bg-color-lvl4)";
+        else if (this.level >= 5) document.body.style.backgroundColor = "var(--bg-color-lvl3)";
+        else if (this.level >= 3) document.body.style.backgroundColor = "var(--bg-color-lvl2)";
+        else document.body.style.backgroundColor = "var(--bg-color-lvl1)";
+    }
+
+    startLevel() {
+        this.state = STATES.LOCKED; // Lock during setup
+        this.currentWord = this.getRandomWord();
+        this.typedWord = "";
+        this.heroHP = 100;
+        this.enemyHP = 100;
+        
+        this.updateHealthUI();
+        this.renderWord();
+        this.updateStats();
+
+        // Reset input
+        this.dom.input.value = "";
+        this.dom.input.focus();
+
+        // Level-specific setup
+        if (this.level >= 3) {
+            // Audio only mode - Auto-speak
+            setTimeout(() => this.speakWord(), 500);
+        }
+
+        this.state = STATES.PLAYING;
+    }
+
+    renderWord() {
+        this.dom.wordDisplay.innerHTML = "";
+        const letters = this.currentWord.split('');
+        
+        letters.forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = "letter-slot";
+            
+            // Logic for what to show
+            if (index < this.typedWord.length) {
+                // Correctly typed letter
+                span.innerText = this.typedWord[index];
+                span.classList.add('filled');
+            } else {
+                // Not yet typed
+                if (this.level === 1) {
+                    span.innerText = char; // Show all in Lvl 1
+                    span.classList.add('hint');
+                } else if (this.level === 2 && index === 0) {
+                    span.innerText = char; // Show first letter Lvl 2
+                    span.classList.add('hint');
+                } else {
+                    span.innerText = "_"; // Hidden
+                }
+            }
+            this.dom.wordDisplay.appendChild(span);
+        });
+    }
+
+    handleInput(e) {
+        if (this.state !== STATES.PLAYING) {
+            this.dom.input.value = ""; // Clear buffer if locked
+            return;
+        }
+
+        const rawVal = this.dom.input.value.toLowerCase();
+        // Get the last character typed
+        const lastChar = rawVal.slice(-1);
+        
+        // Reset buffer to keep it clean, but keep focus
+        // We only care about the *new* keystroke
+        if (rawVal.length === 0) return; // Backspace or empty
+        this.dom.input.value = ""; 
+
+        const targetIndex = this.typedWord.length;
+        const targetChar = this.currentWord[targetIndex].toLowerCase();
+
+        if (lastChar === targetChar) {
+            // Correct!
+            this.typedWord += lastChar;
+            this.renderWord();
+            this.heroAttack();
+            
+            if (this.typedWord.length === this.currentWord.length) {
+                this.handleWin();
+            }
+        } else {
+            // Incorrect!
+            this.enemyAttack();
+        }
+    }
+
+    heroAttack() {
+        this.enemyHP -= CONFIG.damagePerHit;
+        if (this.enemyHP < 0) this.enemyHP = 0;
+        this.updateHealthUI();
+        
+        // Animations
+        this.dom.heroSprite.classList.add('attack-anim');
+        this.dom.enemySprite.classList.add('shake');
+        this.showFloatingText(this.dom.enemySprite, "POW!", "red");
+
+        setTimeout(() => {
+            this.dom.heroSprite.classList.remove('attack-anim');
+            this.dom.enemySprite.classList.remove('shake');
+        }, 300);
+    }
+
+    enemyAttack() {
+        this.heroHP -= CONFIG.heroDamage;
+        if (this.heroHP < 0) this.heroHP = 0;
+        this.updateHealthUI();
+
+        // Animations
+        this.dom.enemySprite.classList.add('attack-anim');
+        this.dom.heroSprite.classList.add('shake');
+        this.showFloatingText(this.dom.heroSprite, "OUCH!", "orange");
+
+        setTimeout(() => {
+            this.dom.enemySprite.classList.remove('attack-anim');
+            this.dom.heroSprite.classList.remove('shake');
+        }, 300);
+
+        if (this.heroHP === 0) {
+            this.handleDeath();
+        }
+    }
+
+    updateHealthUI() {
+        this.dom.heroHP.style.width = `${this.heroHP}%`;
+        this.dom.enemyHP.style.width = `${this.enemyHP}%`;
+    }
+
+    handleWin() {
+        this.state = STATES.LOCKED;
+        this.showFloatingText(this.dom.heroSprite, "VICTORY!", "gold");
+        
+        // XP Gain
+        this.xp += CONFIG.xpPerWord;
+        this.score += 100;
+        
+        // Check Level Up
+        if (this.xp >= CONFIG.xpToLevel) {
+            this.level++;
+            this.xp = 0; // Reset bar or carry over logic
+            this.showFloatingText(this.dom.heroSprite, "LEVEL UP!", "#00ff00");
+            // Play sound?
+        }
+
+        this.updateStats();
+
+        // Delay next word
+        setTimeout(() => {
+            this.startLevel();
+        }, 1500);
+    }
+
+    handleDeath() {
+        this.state = STATES.LOCKED;
+        this.hearts--;
+        this.updateStats();
+
+        if (this.hearts <= 0) {
+            // Game Over
+            this.state = STATES.GAMEOVER;
+            this.dom.modalTitle.innerText = "GAME OVER";
+            this.dom.modalMsg.innerText = `Final Score: ${this.score}`;
+            this.dom.modal.classList.add('visible');
+        } else {
+            // Revive
+            this.showFloatingText(this.dom.heroSprite, "REVIVED!", "pink");
+            setTimeout(() => {
+                this.heroHP = 100;
+                this.updateHealthUI();
+                this.state = STATES.PLAYING;
+                this.dom.input.focus();
+            }, 1000);
+        }
+    }
+
+    // --- Actions ---
+    speakWord() {
+        const u = new SpeechSynthesisUtterance(this.currentWord);
+        u.rate = 0.8;
+        window.speechSynthesis.speak(u);
+        this.dom.input.focus();
+    }
+
+    speakDefinition() {
+        let text = DEFINITIONS[this.currentWord];
+        if (!text) text = `Spell the word ${this.currentWord}.`;
+        
+        const u = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(u);
+        this.dom.input.focus();
+    }
+
+    peek() {
+        if (this.state !== STATES.PLAYING) return;
+        
+        // Show next letter temporarily
+        const idx = this.typedWord.length;
+        if (idx >= this.currentWord.length) return;
+
+        const char = this.currentWord[idx];
+        
+        // Create visual hint
+        const slots = document.getElementsByClassName('letter-slot');
+        const slot = slots[idx];
+        const originalText = slot.innerText;
+        
+        slot.innerText = char;
+        slot.style.color = "red";
+        
+        // Cost
+        if (this.xp > 0) {
+            this.xp = Math.max(0, this.xp - CONFIG.xpPenaltyPeek);
+            this.updateStats();
+        }
+
+        setTimeout(() => {
+            slot.innerText = originalText;
+            slot.style.color = "";
+            if (slot.classList.contains('hint')) {
+                 slot.style.color = "#555";
+            }
+        }, 1000);
+        
+        this.dom.input.focus();
+    }
+
+    showFloatingText(element, text, color) {
+        const rect = element.getBoundingClientRect();
+        const floatEl = document.createElement('div');
+        floatEl.innerText = text;
+        floatEl.className = 'feedback';
+        floatEl.style.color = color;
+        floatEl.style.left = rect.left + 'px';
+        floatEl.style.top = rect.top + 'px';
+        
+        document.body.appendChild(floatEl);
+        
+        setTimeout(() => {
+            floatEl.remove();
+        }, 1000);
+    }
+}
+
+// Start
+const game = new Game();
+
+</script>
 </body>
 </html>
