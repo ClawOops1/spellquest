@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SpellQuest: Dungeon of Words 🗡️🐝</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --text: #e94560;
+            --gold: #fbc02d;
+            --success: #4caf50;
+            --monster: #9b59b6;
+        }
+        * { box-sizing: border-box; font-family: 'Press Start 2P', cursive; }
+        body {
+            margin: 0; background: var(--bg); color: #fff;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; overflow: hidden; touch-action: manipulation;
+        }
+        #game-stage {
+            width: 100%; max-width: 500px; height: 35vh;
+            background: #0f3460; position: relative;
+            border-bottom: 4px solid #fff;
+            display: flex; justify-content: space-around; align-items: flex-end;
+            padding-bottom: 20px;
+        }
+        .actor { font-size: 60px; transition: all 0.2s; position: relative; }
+        #hero { filter: drop-shadow(0 0 10px #fff); }
+        #monster { color: var(--monster); }
+        
+        .hp-bar-container {
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            width: 60px; height: 8px; background: #333; border: 2px solid #fff;
+        }
+        .hp-fill { width: 100%; height: 100%; background: #ff2e63; transition: width 0.3s; }
+
+        #ui-panel {
+            flex-grow: 1; width: 100%; max-width: 500px;
+            padding: 15px; display: flex; flex-direction: column; align-items: center;
+            background: var(--panel); text-align: center;
+        }
+        #message-box {
+            font-size: 10px; line-height: 1.6; color: #fff;
+            margin: 10px 0; min-height: 40px;
+        }
+        #word-display {
+            font-size: 20px; color: var(--gold); letter-spacing: 4px;
+            margin: 20px 0; min-height: 30px;
+        }
+        .letter-box {
+            display: inline-block; width: 24px; border-bottom: 3px solid #fff;
+            margin: 0 4px; text-align: center;
+        }
+        .letter-box.wrong { color: var(--text); animation: shake 0.2s; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: auto; }
+        button {
+            padding: 15px 5px; font-size: 8px; border: none; background: #0f3460;
+            color: #fff; border: 3px solid #fff; cursor: pointer;
+        }
+        button:active { background: var(--text); }
+        
+        #mobile-input { position: absolute; opacity: 0; pointer-events: none; }
+        
+        /* Loot Popup */
+        #loot-screen {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 100; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #loot-icon { font-size: 80px; margin-bottom: 20px; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    </style>
+</head>
+<body onclick="focusInput()">
+    <input type="text" id="mobile-input" autocomplete="off" autocapitalize="off">
+    
+    <div id="game-stage">
+        <div id="hero" class="actor">🐝
+            <div class="hp-bar-container"><div id="hero-hp" class="hp-fill"></div></div>
+        </div>
+        <div id="monster" class="actor">👾
+            <div class="hp-bar-container"><div id="monster-hp" class="hp-fill"></div></div>
+        </div>
+    </div>
+
+    <div id="ui-panel">
+        <div id="message-box">A wild MONSTER appeared! Spell the word to ATTACK!</div>
+        <div id="word-display"></div>
+        
+        <div class="controls">
+            <button onclick="speakWord()">🔊 HEAR WORD</button>
+            <button onclick="peekWord()">👁️ PEEK (5XP)</button>
+        </div>
+        <div style="margin-top:15px; font-size:8px;">LVL <span id="lvl">1</span> | XP <span id="xp">0</span></div>
+    </div>
+
+    <div id="loot-screen" onclick="closeLoot()">
+        <div id="loot-msg">TREASURE FOUND!</div>
+        <div id="loot-icon">🎁</div>
+        <div id="loot-item">You found a Super Potion!</div>
+        <div style="margin-top:20px; font-size:8px;">(Tap to continue)</div>
+    </div>
+
+    <script>
+        const words = ["unicorn", "pirate", "magic", "dragon", "knight", "castle", "forest", "wizard", "goblin", "treasure"];
+        let state = {
+            word: "", typed: "", hp: 100, mHp: 100, xp: 0, lvl: 1, monsterIdx: 0
+        };
+        const monsters = ["👾", "👹", "🐉", "👻", "🦇", "🐺"];
+
+        function speak(t) {
+            window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t);
+            m.rate = 0.8;
+            window.speechSynthesis.speak(m);
+        }
+
+        function focusInput() { document.getElementById('mobile-input').focus(); }
+
+        function initWord() {
+            state.word = words[Math.floor(Math.random() * words.length)];
+            state.typed = "";
+            state.mHp = 100;
+            updateHP();
+            
+            const container = document.getElementById('word-display');
+            container.innerHTML = "";
+            for(let i=0; i<state.word.length; i++) {
+                const b = document.createElement('span');
+                b.className = 'letter-box';
+                b.innerText = "_";
+                container.appendChild(b);
+            }
+            document.getElementById('message-box').innerText = "SPELL: " + state.word.toUpperCase();
+            speak(state.word);
+        }
+
+        function updateHP() {
+            document.getElementById('hero-hp').style.width = state.hp + "%";
+            document.getElementById('monster-hp').style.width = state.mHp + "%";
+        }
+
+        function handleInput(char) {
+            const expected = state.word[state.typed.length].toLowerCase();
+            const input = char.toLowerCase();
+            const boxes = document.querySelectorAll('.letter-box');
+
+            if (input === expected) {
+                boxes[state.typed.length].innerText = char.toUpperCase();
+                state.typed += char;
+                speak(char);
+                
+                // Attack animation
+                document.getElementById('hero').style.transform = "translateX(30px)";
+                setTimeout(() => document.getElementById('hero').style.transform = "translateX(0)", 100);
+                
+                state.mHp -= (100 / state.word.length);
+                updateHP();
+
+                if (state.typed.length === state.word.length) {
+                    victory();
+                }
+            } else if (/^[a-z]$/i.test(char)) {
+                boxes[state.typed.length].classList.add('wrong');
+                setTimeout(() => boxes[state.typed.length].classList.remove('wrong'), 200);
+                
+                // Monster attack
+                document.getElementById('monster').style.transform = "translateX(-30px)";
+                setTimeout(() => document.getElementById('monster').style.transform = "translateX(0)", 100);
+                
+                state.hp -= 10;
+                updateHP();
+                speak("Wrong!");
+                if (state.hp <= 0) gameOver();
+            }
+        }
+
+        function victory() {
+            state.xp += 20;
+            document.getElementById('xp').innerText = state.xp;
+            speak("Victory!");
+            
+            if (state.xp % 40 === 0) {
+                showLoot();
+            } else {
+                setTimeout(() => {
+                    state.monsterIdx = (state.monsterIdx + 1) % monsters.length;
+                    document.getElementById('monster').innerText = monsters[state.monsterIdx];
+                    document.getElementById('monster').innerHTML += '<div class="hp-bar-container"><div id="monster-hp" class="hp-fill"></div></div>';
+                    initWord();
+                }, 1000);
+            }
+        }
+
+        function showLoot() {
+            const items = ["Gold Sword", "Magic Shield", "Speed Boots", "Cookie"];
+            const item = items[Math.floor(Math.random()*items.length)];
+            document.getElementById('loot-item').innerText = "You found: " + item;
+            document.getElementById('loot-screen').style.display = 'flex';
+        }
+
+        function closeLoot() {
+            document.getElementById('loot-screen').style.display = 'none';
+            initWord();
+        }
+
+        function gameOver() {
+            alert("GAME OVER! Try again?");
+            state.hp = 100;
+            initWord();
+        }
+
+        function speakWord() { speak(state.word); }
+        function peekWord() {
+            if (state.xp >= 5) {
+                state.xp -= 5;
+                document.getElementById('xp').innerText = state.xp;
+                const nextChar = state.word[state.typed.length];
+                const boxes = document.querySelectorAll('.letter-box');
+                boxes[state.typed.length].innerText = nextChar.toUpperCase();
+                boxes[state.typed.length].style.color = "var(--gold)";
+                setTimeout(() => {
+                    if (state.typed.length <= boxes.length && boxes[state.typed.length].innerText === nextChar.toUpperCase() && state.typed.indexOf(nextChar) === -1) {
+                         // boxes[state.typed.length].innerText = "_";
+                    }
+                }, 1000);
+            }
+        }
+
+        document.getElementById('mobile-input').addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.length > 0) {
+                handleInput(val[val.length - 1]);
+                e.target.value = "";
+            }
+        });
+
+        window.onload = initWord;
+    </script>
+</body>
+</html>
