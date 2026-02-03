@@ -19,7 +19,7 @@
 
         * {
             box-sizing: border-box;
-            touch-action: manipulation; /* Improves touch response */
+            touch-action: manipulation;
         }
 
         body {
@@ -33,41 +33,52 @@
             align-items: center;
             justify-content: flex-start;
             min-height: 100vh;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden; 
             transition: background-color 1s ease;
         }
 
-        /* --- UI Layout --- */
         #game-container {
             width: 100%;
             max-width: 600px;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 5px; /* Reduced padding */
             position: relative;
         }
 
-        @media (max-height: 700px) {
+        /* --- Radical Mobile Adjustments --- */
+        @media (max-width: 600px), (max-height: 700px) {
             header {
-                padding: 5px;
-                margin-bottom: 5px;
+                order: 2; /* Move header down to save top space */
+                padding: 5px !important;
+                font-size: 0.6rem !important;
+                margin-bottom: 5px !important;
             }
             #arena {
-                transform: translateY(-20px);
-                margin: 5px 0;
+                order: 1; /* Move arena to the very top */
+                margin-top: 0 !important;
+                flex-grow: 0 !important;
+                height: 120px;
             }
             #word-display {
-                transform: translateY(-25px);
-                margin: 5px 0;
+                order: 3;
+                margin: 10px 0 !important;
+                font-size: 1.2rem !important;
             }
             #history-container {
-                transform: translateY(-25px);
-                margin: 5px 0;
+                order: 4;
+                margin: 5px 0 !important;
             }
             #controls {
-                transform: translateY(-20px);
-                gap: 5px;
+                order: 5;
+                margin-bottom: 5px !important;
+            }
+            #xp-container {
+                order: 6;
+            }
+            .character {
+                font-size: 2.2rem !important;
             }
         }
 
@@ -75,11 +86,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 10px;
             font-size: 0.8rem;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            padding: 10px;
             margin-bottom: 10px;
         }
 
@@ -95,7 +105,6 @@
             margin-bottom: 5px;
         }
 
-        /* --- Battle Arena --- */
         #arena {
             flex-grow: 1;
             display: flex;
@@ -103,6 +112,7 @@
             align-items: center;
             position: relative;
             margin: 10px 0;
+            width: 100%;
         }
 
         .character {
@@ -111,7 +121,7 @@
             transition: transform 0.2s;
         }
 
-        #hero { transform: scaleX(-1); } /* Face right */
+        #hero { transform: scaleX(-1); }
         
         .health-bar-container {
             width: 80px;
@@ -130,29 +140,6 @@
             background: var(--success-color);
             width: 100%;
             transition: width 0.3s;
-        }
-
-        .shake { animation: shake 0.5s; }
-        .attack-anim { animation: lunge 0.3s; }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
-        @keyframes lunge {
-            0% { transform: scaleX(-1) translateX(0); }
-            50% { transform: scaleX(-1) translateX(-50px); }
-            100% { transform: scaleX(-1) translateX(0); }
         }
 
         /* --- Word Display --- */
@@ -175,6 +162,23 @@
         .letter-slot.filled { border-bottom: none; }
         .letter-slot.hint { color: #555; opacity: 0.6; }
 
+        /* --- History Dropdown --- */
+        #history-container {
+            margin: 10px 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        #word-history {
+            width: 90%;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 10px;
+            border: 4px solid #333;
+            background: #fff;
+            color: #333;
+        }
+
         /* --- Controls --- */
         #controls {
             display: grid;
@@ -192,8 +196,6 @@
             font-size: 0.7rem;
             cursor: pointer;
             text-transform: uppercase;
-            active: transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0 #333;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -207,32 +209,11 @@
 
         .btn-icon { font-size: 1.5rem; margin-bottom: 5px; }
 
-        /* --- Word History List --- */
-        #history-container {
-            margin: 10px 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        #word-history {
-            width: 80%;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.6rem;
-            padding: 5px;
-            border: 2px solid #333;
-            background: #fff;
-        }
-
-        .word-untested { color: #333; }
-        .word-tested { color: var(--success-color); }
-
-        /* --- Energy/XP Bar --- */
         #xp-container {
             width: 100%;
             height: 20px;
             background: #333;
             border: 2px solid #fff;
-            margin-top: auto; /* Push to bottom */
             position: relative;
         }
 
@@ -248,31 +229,37 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.6rem;
+            font-size: 0.5rem;
             color: #000;
             width: 100%;
             text-align: center;
         }
 
-        /* --- Hidden Input for Mobile Keyboard --- */
         #hidden-input {
             position: absolute;
             opacity: 0;
             top: -1000px;
         }
-        
-        /* Mobile keyboard keep-alive overlay */
-        #keyboard-trigger {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-            display: none; /* Shown only when needed */
+
+        /* --- Animations --- */
+        .shake { animation: shake 0.5s; }
+        .attack-anim { animation: lunge 0.3s; }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        /* --- Modal --- */
+        @keyframes lunge {
+            0% { transform: scaleX(-1) translateX(0); }
+            50% { transform: scaleX(-1) translateX(-50px); }
+            100% { transform: scaleX(-1) translateX(0); }
+        }
+
         #modal-overlay {
             position: fixed;
             top: 0;
@@ -301,27 +288,10 @@
             text-align: center;
             max-width: 80%;
         }
-        
-        .modal-title {
-            color: var(--danger-color);
-            margin-bottom: 15px;
-        }
-        
-        .modal-btn {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-family: inherit;
-            margin-top: 15px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
 
-        /* Feedback text floating */
         .feedback {
             position: absolute;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             pointer-events: none;
             animation: floatUp 1s forwards;
@@ -338,6 +308,17 @@
 <body>
 
 <div id="game-container">
+    <div id="arena">
+        <div id="hero" class="character">
+            <div id="hero-sprite">🐝</div>
+            <div class="health-bar-container"><div id="hero-hp" class="health-bar-fill"></div></div>
+        </div>
+        <div id="enemy" class="character">
+            <div id="enemy-sprite">👾</div>
+            <div class="health-bar-container"><div id="enemy-hp" class="health-bar-fill"></div></div>
+        </div>
+    </div>
+
     <header>
         <div class="stats-box">
             <span>LVL <span id="level-display">1</span></span>
@@ -350,24 +331,11 @@
         </div>
     </header>
 
-    <div id="arena">
-        <div id="hero" class="character">
-            <div id="hero-sprite">🐝</div>
-            <div class="health-bar-container"><div id="hero-hp" class="health-bar-fill"></div></div>
-        </div>
-        <div id="enemy" class="character">
-            <div id="enemy-sprite">👾</div>
-            <div class="health-bar-container"><div id="enemy-hp" class="health-bar-fill"></div></div>
-        </div>
-    </div>
-
-    <div id="word-display">
-        <!-- Spans injected here -->
-    </div>
+    <div id="word-display"></div>
 
     <div id="history-container">
         <select id="word-history">
-            <option value="">-- Tested Words --</option>
+            <option value="">-- Word List --</option>
         </select>
     </div>
 
@@ -391,9 +359,7 @@
         <div id="xp-text">ENERGY (LEVEL UP)</div>
     </div>
     
-    <!-- Hidden input to capture mobile keyboard -->
     <input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-    <div id="keyboard-trigger"></div>
 </div>
 
 <div id="modal-overlay">
@@ -405,16 +371,6 @@
 </div>
 
 <script>
-/**
- * SpellQuest Game Logic
- * 
- * Features:
- * - Robust State Machine (STATES object) to prevent race conditions.
- * - Adaptive difficulty based on levels.
- * - Mobile-first keyboard handling.
- */
-
-// --- Data ---
 const WORD_LISTS = {
     grade3: ["unicorn", "pirates", "leaning", "acrobat", "forepaw", "recipe", "mermaid", "incredible", "nervous", "raise", "attacked", "streetlights", "shouting", "dinosaur", "gorgeous", "avocado", "formation", "faraway", "understand", "breakfast", "message", "elephant", "garbage", "bombarded", "leather", "peppercorn", "weather", "turnout", "journey", "asleep", "brilliant", "monsoon", "valentine", "especially", "heater", "wooden", "window", "chocolate", "hedgehog", "surprise", "disability", "countess", "cartwheel", "zooming", "eaten", "courtyard", "curious", "vacuum", "dangerous", "February"],
     grade4: ["hesitate", "fragments", "ration", "frustration", "aroma", "perfume", "discoveries", "prognosis", "gallop", "fluently", "sardines", "rickety", "porridge", "beige", "gaunt", "nautical", "foreign", "scorcher", "deflated", "cosmetics", "unruly", "moustache", "sinister", "lurches", "Buffalo", "fabulous", "mysterious", "anguish", "lilt", "democracy", "ancestral", "enormous", "dubious", "scavenger", "unleash", "crawdad", "mascot", "artifacts", "tuxedo", "language", "sequins", "lanky", "brandished", "conical", "pediatric", "rummage", "grimace", "geranium", "ebony", "paltry"],
@@ -422,9 +378,7 @@ const WORD_LISTS = {
     grade6: ["zombielike", "convulsively", "graffitist", "cavorting", "battlements", "khaki", "Yiddish", "equestrian", "manticores", "guttural", "sans serif", "Frankenstein", "vidimus", "archipelago", "pinioning", "galleon", "wainscoting", "warlock", "dimensional", "Everest", "marauder", "deferential", "opalescent", "talcum", "plaited", "prestigious", "lo mein", "psyche", "schema", "delphine", "serape", "chignon", "magnanimous", "Nehru", "colossus", "garishly", "dexterity", "conscience", "albatross", "asphalt", "tranquilizer", "monsieur", "fraidycat", "courier", "stucco", "et cetera", "slough", "puissance", "pheromone", "chartreuse"]
 };
 
-// --- Context Sentences for Story Mode ---
 const SENTENCES = {
-    // Grade 3
     "unicorn": "The magical unicorn had a shimmering silver horn.",
     "pirates": "The pirates sailed the high seas looking for gold.",
     "leaning": "She was leaning against the fence while waiting for the bus.",
@@ -475,7 +429,6 @@ const SENTENCES = {
     "vacuum": "I need to vacuum the rug before the guests arrive.",
     "dangerous": "It is dangerous to text while driving.",
     "February": "February is the shortest month of the year.",
-
     // Grade 4
     "hesitate": "Do not hesitate to ask for help if you need it.",
     "fragments": "The vase shattered into tiny fragments on the floor.",
@@ -527,7 +480,6 @@ const SENTENCES = {
     "geranium": "She planted a red geranium in the flower pot.",
     "ebony": "The piano keys were made of ivory and ebony.",
     "paltry": "He was paid a paltry sum for all his hard work.",
-
     // Grade 5
     "verdict": "The jury delivered a verdict of not guilty.",
     "imitation": "It wasn't real silk, just a cheap imitation.",
@@ -579,7 +531,6 @@ const SENTENCES = {
     "atrium": "The hotel had a glass-roofed atrium filled with plants.",
     "almanac": "Farmers often consult an almanac for weather predictions.",
     "campaign": "The mayor launched a campaign to clean up the city parks.",
-
     // Grade 6
     "zombielike": "The tired students walked through the hall in a zombielike state.",
     "convulsively": "His shoulders shook convulsively as he sobbed.",
@@ -633,23 +584,8 @@ const SENTENCES = {
     "chartreuse": "She wore a bright chartreuse dress to the party."
 };
 
-// --- Game State Constants ---
-const STATES = {
-    IDLE: 'IDLE',          // Waiting for user to start or between rounds
-    PLAYING: 'PLAYING',    // Active typing
-    LOCKED: 'LOCKED',      // Processing animation/transition (ignore input)
-    GAMEOVER: 'GAMEOVER'   // Dead state
-};
-
-// --- Configuration ---
-const CONFIG = {
-    xpToLevel: 100,
-    xpPerWord: 20,
-    xpPenaltyPeek: 10,
-    damagePerHit: 20, // Enemy takes 5 hits
-    heroDamage: 25,   // Hero takes 4 hits
-    maxHearts: 3
-};
+const STATES = { IDLE: 'IDLE', PLAYING: 'PLAYING', LOCKED: 'LOCKED', GAMEOVER: 'GAMEOVER' };
+const CONFIG = { xpToLevel: 100, xpPerWord: 20, xpPenaltyPeek: 10, damagePerHit: 20, heroDamage: 25, maxHearts: 3 };
 
 class Game {
     constructor() {
@@ -662,9 +598,8 @@ class Game {
         this.typedWord = "";
         this.heroHP = 100;
         this.enemyHP = 100;
-        this.testedWords = new Set(); // Track unique tested words
+        this.testedWords = new Set();
         
-        // DOM Cache
         this.dom = {
             input: document.getElementById('hidden-input'),
             wordDisplay: document.getElementById('word-display'),
@@ -679,33 +614,19 @@ class Game {
             modal: document.getElementById('modal-overlay'),
             modalTitle: document.getElementById('modal-title'),
             modalMsg: document.getElementById('modal-message'),
-            kbTrigger: document.getElementById('keyboard-trigger'),
             history: document.getElementById('word-history')
         };
-
         this.init();
     }
 
     init() {
-        // Setup Event Listeners
         this.dom.input.addEventListener('input', (e) => this.handleInput(e));
-        
-        // Ensure keyboard focus is maintained on click anywhere
-        document.addEventListener('click', () => {
-            if (this.state === STATES.PLAYING) {
-                this.dom.input.focus();
-            }
-        });
-
-        // Start game
+        document.addEventListener('click', () => { if (this.state === STATES.PLAYING) this.dom.input.focus(); });
         this.startLevel();
     }
 
     resetGame() {
-        this.level = 1;
-        this.score = 0;
-        this.hearts = CONFIG.maxHearts;
-        this.xp = 0;
+        this.level = 1; this.score = 0; this.hearts = CONFIG.maxHearts; this.xp = 0;
         this.updateStats();
         this.dom.modal.classList.remove('visible');
         this.startLevel();
@@ -727,17 +648,11 @@ class Game {
         this.dom.level.innerText = this.level;
         this.dom.score.innerText = this.score;
         this.dom.hearts.innerText = "❤️".repeat(this.hearts);
-        
-        // XP Bar
         let xpPercent = (this.xp / CONFIG.xpToLevel) * 100;
         this.dom.xpFill.style.width = `${Math.min(xpPercent, 100)}%`;
-
-        // Bee Evolution
         if (this.level >= 10) this.dom.heroSprite.innerText = "🐝👑";
         else if (this.level >= 5) this.dom.heroSprite.innerText = "🐝✨";
         else this.dom.heroSprite.innerText = "🐝";
-
-        // Background Color Evolution
         if (this.level >= 7) document.body.style.backgroundColor = "var(--bg-color-lvl4)";
         else if (this.level >= 5) document.body.style.backgroundColor = "var(--bg-color-lvl3)";
         else if (this.level >= 3) document.body.style.backgroundColor = "var(--bg-color-lvl2)";
@@ -745,24 +660,18 @@ class Game {
     }
 
     startLevel() {
-        this.state = STATES.LOCKED; // Lock during setup
+        this.state = STATES.LOCKED;
         this.currentWord = this.getRandomWord();
         this.typedWord = "";
         this.heroHP = 100;
         this.enemyHP = 100;
-        
         this.updateHealthUI();
         this.renderWord();
         this.updateStats();
         this.updateHistoryList();
-
-        // Reset input
         this.dom.input.value = "";
         this.dom.input.focus();
-
-        // Always auto-speak the word at start
         setTimeout(() => this.speakWord(), 500);
-
         this.state = STATES.PLAYING;
     }
 
@@ -774,8 +683,10 @@ class Game {
             opt.value = word;
             opt.innerText = word;
             if (this.testedWords.has(word)) {
-                opt.style.color = "var(--success-color)";
+                opt.classList.add('word-tested');
                 opt.innerText += " (✓)";
+            } else {
+                opt.classList.add('word-untested');
             }
             this.dom.history.appendChild(opt);
         });
@@ -784,61 +695,35 @@ class Game {
     renderWord() {
         this.dom.wordDisplay.innerHTML = "";
         const letters = this.currentWord.split('');
-        
         letters.forEach((char, index) => {
             const span = document.createElement('span');
             span.className = "letter-slot";
-            
-            // Logic for what to show
             if (index < this.typedWord.length) {
-                // Correctly typed letter
                 span.innerText = this.typedWord[index];
                 span.classList.add('filled');
             } else {
-                // Not yet typed
-                if (this.level === 1) {
-                    span.innerText = char; // Show all in Lvl 1
-                    span.classList.add('hint');
-                } else if (this.level === 2 && index === 0) {
-                    span.innerText = char; // Show first letter Lvl 2
-                    span.classList.add('hint');
-                } else {
-                    span.innerText = "_"; // Hidden
-                }
+                if (this.level === 1) { span.innerText = char; span.classList.add('hint'); }
+                else if (this.level === 2 && index === 0) { span.innerText = char; span.classList.add('hint'); }
+                else { span.innerText = "_"; }
             }
             this.dom.wordDisplay.appendChild(span);
         });
     }
 
     handleInput(e) {
-        if (this.state !== STATES.PLAYING) {
-            this.dom.input.value = ""; // Clear buffer if locked
-            return;
-        }
-
+        if (this.state !== STATES.PLAYING) { this.dom.input.value = ""; return; }
         const rawVal = this.dom.input.value.toLowerCase();
-        // Get the last character typed
         const lastChar = rawVal.slice(-1);
-        
-        // Reset buffer to keep it clean, but keep focus
-        // We only care about the *new* keystroke
-        if (rawVal.length === 0) return; // Backspace or empty
+        if (rawVal.length === 0) return;
         this.dom.input.value = ""; 
-
         const targetIndex = this.typedWord.length;
         const targetChar = this.currentWord[targetIndex].toLowerCase();
-
         if (lastChar === targetChar) {
-            // Correct!
             this.typedWord += lastChar;
             this.renderWord();
             this.heroAttack();
-            
-            if (this.typedWord.length === this.currentWord.length) {
-                this.handleWin();
-            }
+            if (this.typedWord.length === this.currentWord.length) this.handleWin();
         } else {
-            // Incorrect!
             this.enemyAttack();
         }
     }
@@ -847,36 +732,21 @@ class Game {
         this.enemyHP -= CONFIG.damagePerHit;
         if (this.enemyHP < 0) this.enemyHP = 0;
         this.updateHealthUI();
-        
-        // Animations
         this.dom.heroSprite.classList.add('attack-anim');
         this.dom.enemySprite.classList.add('shake');
         this.showFloatingText(this.dom.enemySprite, "POW!", "red");
-
-        setTimeout(() => {
-            this.dom.heroSprite.classList.remove('attack-anim');
-            this.dom.enemySprite.classList.remove('shake');
-        }, 300);
+        setTimeout(() => { this.dom.heroSprite.classList.remove('attack-anim'); this.dom.enemySprite.classList.remove('shake'); }, 300);
     }
 
     enemyAttack() {
         this.heroHP -= CONFIG.heroDamage;
         if (this.heroHP < 0) this.heroHP = 0;
         this.updateHealthUI();
-
-        // Animations
         this.dom.enemySprite.classList.add('attack-anim');
         this.dom.heroSprite.classList.add('shake');
         this.showFloatingText(this.dom.heroSprite, "OUCH!", "orange");
-
-        setTimeout(() => {
-            this.dom.enemySprite.classList.remove('attack-anim');
-            this.dom.heroSprite.classList.remove('shake');
-        }, 300);
-
-        if (this.heroHP === 0) {
-            this.handleDeath();
-        }
+        setTimeout(() => { this.dom.enemySprite.classList.remove('attack-anim'); this.dom.heroSprite.classList.remove('shake'); }, 300);
+        if (this.heroHP === 0) this.handleDeath();
     }
 
     updateHealthUI() {
@@ -887,54 +757,29 @@ class Game {
     handleWin() {
         this.state = STATES.LOCKED;
         this.showFloatingText(this.dom.heroSprite, "VICTORY!", "gold");
-        
-        // Mark as tested
         this.testedWords.add(this.currentWord);
-        
-        // XP Gain
         this.xp += CONFIG.xpPerWord;
         this.score += 100;
-        
-        // Check Level Up
-        if (this.xp >= CONFIG.xpToLevel) {
-            this.level++;
-            this.xp = 0; // Reset bar or carry over logic
-            this.showFloatingText(this.dom.heroSprite, "LEVEL UP!", "#00ff00");
-            // Play sound?
-        }
-
+        if (this.xp >= CONFIG.xpToLevel) { this.level++; this.xp = 0; this.showFloatingText(this.dom.heroSprite, "LEVEL UP!", "#00ff00"); }
         this.updateStats();
-
-        // Delay next word
-        setTimeout(() => {
-            this.startLevel();
-        }, 1500);
+        setTimeout(() => this.startLevel(), 1500);
     }
 
     handleDeath() {
         this.state = STATES.LOCKED;
         this.hearts--;
         this.updateStats();
-
         if (this.hearts <= 0) {
-            // Game Over
             this.state = STATES.GAMEOVER;
             this.dom.modalTitle.innerText = "GAME OVER";
             this.dom.modalMsg.innerText = `Final Score: ${this.score}`;
             this.dom.modal.classList.add('visible');
         } else {
-            // Revive
             this.showFloatingText(this.dom.heroSprite, "REVIVED!", "pink");
-            setTimeout(() => {
-                this.heroHP = 100;
-                this.updateHealthUI();
-                this.state = STATES.PLAYING;
-                this.dom.input.focus();
-            }, 1000);
+            setTimeout(() => { this.heroHP = 100; this.updateHealthUI(); this.state = STATES.PLAYING; this.dom.input.focus(); }, 1000);
         }
     }
 
-    // --- Actions ---
     speakWord() {
         const wordPrompt = `The word is: ${this.currentWord}. ${this.currentWord}.`;
         const u = new SpeechSynthesisUtterance(wordPrompt);
@@ -946,7 +791,6 @@ class Game {
     speakDefinition() {
         let text = SENTENCES[this.currentWord];
         if (!text) text = `Spell the word ${this.currentWord}.`;
-        
         const u = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(u);
         this.dom.input.focus();
@@ -954,58 +798,29 @@ class Game {
 
     peek() {
         if (this.state !== STATES.PLAYING) return;
-        
-        // Show next letter temporarily
         const idx = this.typedWord.length;
         if (idx >= this.currentWord.length) return;
-
         const char = this.currentWord[idx];
-        
-        // Create visual hint
         const slots = document.getElementsByClassName('letter-slot');
         const slot = slots[idx];
         const originalText = slot.innerText;
-        
         slot.innerText = char;
         slot.style.color = "red";
-        
-        // Cost
-        if (this.xp > 0) {
-            this.xp = Math.max(0, this.xp - CONFIG.xpPenaltyPeek);
-            this.updateStats();
-        }
-
-        setTimeout(() => {
-            slot.innerText = originalText;
-            slot.style.color = "";
-            if (slot.classList.contains('hint')) {
-                 slot.style.color = "#555";
-            }
-        }, 1000);
-        
+        if (this.xp > 0) { this.xp = Math.max(0, this.xp - CONFIG.xpPenaltyPeek); this.updateStats(); }
+        setTimeout(() => { slot.innerText = originalText; slot.style.color = ""; if (slot.classList.contains('hint')) slot.style.color = "#555"; }, 1000);
         this.dom.input.focus();
     }
 
     showFloatingText(element, text, color) {
         const rect = element.getBoundingClientRect();
         const floatEl = document.createElement('div');
-        floatEl.innerText = text;
-        floatEl.className = 'feedback';
-        floatEl.style.color = color;
-        floatEl.style.left = rect.left + 'px';
-        floatEl.style.top = rect.top + 'px';
-        
+        floatEl.innerText = text; floatEl.className = 'feedback'; floatEl.style.color = color;
+        floatEl.style.left = rect.left + 'px'; floatEl.style.top = rect.top + 'px';
         document.body.appendChild(floatEl);
-        
-        setTimeout(() => {
-            floatEl.remove();
-        }, 1000);
+        setTimeout(() => floatEl.remove(), 1000);
     }
 }
-
-// Start
 const game = new Game();
-
 </script>
 </body>
 </html>
