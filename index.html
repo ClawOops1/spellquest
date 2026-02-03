@@ -374,13 +374,215 @@ const WORD_LISTS = {
     grade6: ["zombielike", "convulsively", "graffitist", "cavorting", "battlements", "khaki", "Yiddish", "equestrian", "manticores", "guttural", "sans serif", "Frankenstein", "vidimus", "archipelago", "pinioning", "galleon", "wainscoting", "warlock", "dimensional", "Everest", "marauder", "deferential", "opalescent", "talcum", "plaited", "prestigious", "lo mein", "psyche", "schema", "delphine", "serape", "chignon", "magnanimous", "Nehru", "colossus", "garishly", "dexterity", "conscience", "albatross", "asphalt", "tranquilizer", "monsieur", "fraidycat", "courier", "stucco", "et cetera", "slough", "puissance", "pheromone", "chartreuse"]
 };
 
-// --- Definitions (Mocked for simplicity, ideally fetched or expanded) ---
-// In a real app, you'd use a dictionary API. Here we use a generic placeholder if missing.
-const DEFINITIONS = {
-    "unicorn": "A mythical horse with a single horn.",
-    "pirates": "Sailors who attack other ships.",
-    "dinosaur": "A large reptile from prehistoric times.",
-    // Fallback logic used in code
+// --- Context Sentences for Story Mode ---
+const SENTENCES = {
+    // Grade 3
+    "unicorn": "The magical unicorn had a shimmering silver horn.",
+    "pirates": "The pirates sailed the high seas looking for gold.",
+    "leaning": "She was leaning against the fence while waiting for the bus.",
+    "acrobat": "The acrobat performed amazing flips on the tightrope.",
+    "forepaw": "The bear lifted its forepaw to scratch its nose.",
+    "recipe": "My grandmother has a secret recipe for chocolate chip cookies.",
+    "mermaid": "The mermaid swam deep under the ocean waves.",
+    "incredible": "The view from the mountaintop was absolutely incredible.",
+    "nervous": "He felt nervous before his big piano recital.",
+    "raise": "Please raise your hand if you know the answer.",
+    "attacked": "The castle was attacked by a fierce dragon.",
+    "streetlights": "The streetlights flickered on as the sun went down.",
+    "shouting": "We could hear someone shouting for help in the distance.",
+    "dinosaur": "The T-Rex is a very famous meat-eating dinosaur.",
+    "gorgeous": "The bride looked gorgeous in her white wedding dress.",
+    "avocado": "I like to spread smashed avocado on my toast.",
+    "formation": "The fighter jets flew in a perfect V formation.",
+    "faraway": "She dreamed of traveling to a faraway land.",
+    "understand": "Do you understand the instructions for the assignment?",
+    "breakfast": "Pancakes and eggs are my favorite breakfast foods.",
+    "message": "He sent a text message to his best friend.",
+    "elephant": "The elephant used its trunk to spray water.",
+    "garbage": "Please take the garbage out to the curb.",
+    "bombarded": "The goalie was bombarded with soccer balls during practice.",
+    "leather": "He wore a brown leather jacket to the party.",
+    "peppercorn": "The chef ground a black peppercorn over the salad.",
+    "weather": "The weather forecast predicts rain for tomorrow.",
+    "turnout": "There was a huge turnout at the school talent show.",
+    "journey": "The journey across the desert took forty days.",
+    "asleep": "The baby fell asleep in her mother's arms.",
+    "brilliant": "The scientist had a brilliant idea that changed the world.",
+    "monsoon": "The heavy rains of the monsoon season flooded the streets.",
+    "valentine": "He gave her a red rose as a valentine gift.",
+    "especially": "I like ice cream, especially mint chocolate chip.",
+    "heater": "We turned on the heater because the room was freezing.",
+    "wooden": "The old wooden chair creaked when I sat on it.",
+    "window": "Please open the window to let some fresh air in.",
+    "chocolate": "She ate a piece of dark chocolate for dessert.",
+    "hedgehog": "The hedgehog rolled into a ball when it felt threatened.",
+    "surprise": "We planned a surprise birthday party for Dad.",
+    "disability": "His disability never stopped him from achieving his dreams.",
+    "countess": "The countess lived in a grand estate in the countryside.",
+    "cartwheel": "She did a perfect cartwheel on the grass.",
+    "zooming": "The race cars were zooming around the track.",
+    "eaten": "Who has eaten all the cookies in the jar?",
+    "courtyard": "We sat in the courtyard and enjoyed the sunshine.",
+    "curious": "The curious cat investigated the empty box.",
+    "vacuum": "I need to vacuum the rug before the guests arrive.",
+    "dangerous": "It is dangerous to text while driving.",
+    "February": "February is the shortest month of the year.",
+
+    // Grade 4
+    "hesitate": "Do not hesitate to ask for help if you need it.",
+    "fragments": "The vase shattered into tiny fragments on the floor.",
+    "ration": "The soldiers had to ration their food during the mission.",
+    "frustration": "She sighed in frustration when the computer crashed.",
+    "aroma": "The aroma of fresh bread filled the kitchen.",
+    "perfume": "She wore a floral perfume that smelled like roses.",
+    "discoveries": "Scientists make new discoveries every day.",
+    "prognosis": "The doctor said the prognosis for recovery is very good.",
+    "gallop": "The horse began to gallop across the open field.",
+    "fluently": "He speaks three languages fluently.",
+    "sardines": "Some people like to eat sardines on crackers.",
+    "rickety": "We walked carefully across the rickety old bridge.",
+    "porridge": "Goldilocks ate the bear's porridge.",
+    "beige": "The walls of the waiting room were painted a dull beige.",
+    "gaunt": "The stray dog looked gaunt and hungry.",
+    "nautical": "The room was decorated with a nautical theme, including anchors and ropes.",
+    "foreign": "They enjoyed trying foreign foods during their vacation.",
+    "scorcher": "It was a real scorcher of a day, over 100 degrees.",
+    "deflated": "The balloon slowly deflated after the party.",
+    "cosmetics": "She bought new cosmetics at the beauty store.",
+    "unruly": "The teacher struggled to control the unruly class.",
+    "moustache": "He grew a thick moustache for the movie role.",
+    "sinister": "The haunted house had a sinister appearance.",
+    "lurches": "The train lurches forward when it starts moving.",
+    "Buffalo": "The Buffalo roamed the plains in large herds.",
+    "fabulous": "She looked fabulous in her new evening gown.",
+    "mysterious": "A mysterious stranger appeared at the door.",
+    "anguish": "You could see the anguish on his face when he lost the game.",
+    "lilt": "She spoke with a cheerful lilt in her voice.",
+    "democracy": "In a democracy, citizens vote for their leaders.",
+    "ancestral": "They visited their ancestral home in Ireland.",
+    "enormous": "The elephant is an enormous animal.",
+    "dubious": "He looked dubious about the plan to build a rocket.",
+    "scavenger": "The vulture is a scavenger that eats dead animals.",
+    "unleash": "The storm will unleash its fury tonight.",
+    "crawdad": "We caught a crawdad in the creek.",
+    "mascot": "The team mascot danced on the sidelines.",
+    "artifacts": "The museum displayed ancient artifacts from Egypt.",
+    "tuxedo": "He wore a black tuxedo to the formal dance.",
+    "language": "Learning a second language is good for your brain.",
+    "sequins": "Her dress was covered in sparkling sequins.",
+    "lanky": "The lanky teenager bumped his head on the doorframe.",
+    "brandished": "The knight brandished his sword at the dragon.",
+    "conical": "The witch wore a tall, conical hat.",
+    "pediatric": "She works as a nurse in the pediatric ward.",
+    "rummage": "I had to rummage through my drawer to find my keys.",
+    "grimace": "He made a grimace when he tasted the sour lemon.",
+    "geranium": "She planted a red geranium in the flower pot.",
+    "ebony": "The piano keys were made of ivory and ebony.",
+    "paltry": "He was paid a paltry sum for all his hard work.",
+
+    // Grade 5
+    "verdict": "The jury delivered a verdict of not guilty.",
+    "imitation": "It wasn't real silk, just a cheap imitation.",
+    "preamble": "The Preamble to the Constitution starts with 'We the People'.",
+    "commotion": "There was a loud commotion in the hallway.",
+    "steeple": "The church steeple reached high into the sky.",
+    "suspicious": "The security guard saw a suspicious person near the gate.",
+    "fugitive": "The police are searching for the escaped fugitive.",
+    "nomad": "The nomad traveled from place to place without a permanent home.",
+    "Berlin": "Berlin is the capital city of Germany.",
+    "bracken": "The deer hid in the thick bracken in the forest.",
+    "rakish": "He wore his hat at a rakish angle.",
+    "gusto": "She ate her dinner with great gusto.",
+    "jeered": "The crowd jeered when the opposing team took the field.",
+    "galore": "There were balloons and candy galore at the carnival.",
+    "eccentric": "The eccentric millionaire lived in a house shaped like a shoe.",
+    "hippies": "The hippies in the 1960s preached peace and love.",
+    "pistachio": "My favorite ice cream flavor is pistachio.",
+    "garbled": "The radio message was garbled and hard to understand.",
+    "miniature": "She collects miniature dollhouse furniture.",
+    "plausible": "His excuse for being late sounded plausible.",
+    "oblivion": "The ancient city was lost to oblivion for centuries.",
+    "spectators": "The spectators cheered loudly for their team.",
+    "parchment": "The old map was drawn on yellowed parchment.",
+    "heron": "The great blue heron stood motionless in the water.",
+    "billowed": "Smoke billowed from the chimney.",
+    "lunacy": "It would be sheer lunacy to go swimming in this storm.",
+    "noggin": "Use your noggin and think of a solution!",
+    "hypnosis": "The therapist used hypnosis to help him quit smoking.",
+    "toiletries": "Don't forget to pack your toiletries like toothbrush and soap.",
+    "winsome": "She had a winsome smile that charmed everyone.",
+    "emporium": "They visited a large shopping emporium downtown.",
+    "savant": "He is a math savant who can calculate huge numbers in his head.",
+    "samosas": "We ordered vegetable samosas as an appetizer.",
+    "mosque": "Muslims go to a mosque to pray.",
+    "encourages": "My teacher encourages me to read more books.",
+    "receptionist": "The receptionist greeted us when we entered the office.",
+    "reprimanding": "The coach was reprimanding the player for being late.",
+    "immigrants": "Many immigrants came to America seeking a better life.",
+    "lanyards": "We wove colorful lanyards at summer camp.",
+    "ramshackle": "The ramshackle hut looked like it would collapse in the wind.",
+    "dissolving": "The sugar is dissolving in the hot tea.",
+    "skewer": "He put the meat and vegetables on a wooden skewer.",
+    "conjure": "The magician seemed to conjure a rabbit out of thin air.",
+    "neon": "The neon sign buzzed and glowed in the night.",
+    "rotunda": "The statue stood in the center of the capitol rotunda.",
+    "gleaned": "She gleaned information from various old books.",
+    "prattling": "The toddler was prattling on about his toy trucks.",
+    "atrium": "The hotel had a glass-roofed atrium filled with plants.",
+    "almanac": "Farmers often consult an almanac for weather predictions.",
+    "campaign": "The mayor launched a campaign to clean up the city parks.",
+
+    // Grade 6
+    "zombielike": "The tired students walked through the hall in a zombielike state.",
+    "convulsively": "His shoulders shook convulsively as he sobbed.",
+    "graffitist": "The police caught the graffitist painting on the wall.",
+    "cavorting": "The puppies were cavorting happily in the grass.",
+    "battlements": "Archers stood on the castle battlements ready to defend.",
+    "khaki": "The soldiers wore khaki uniforms to blend in with the sand.",
+    "Yiddish": "My grandfather often uses Yiddish words when he speaks.",
+    "equestrian": "She is an equestrian who loves riding horses.",
+    "manticores": "Manticores are mythical beasts with a lion's body.",
+    "guttural": "He made a low, guttural sound in his throat.",
+    "sans serif": "Arial is a popular sans serif font.",
+    "Frankenstein": "Dr. Frankenstein created a monster in his lab.",
+    "vidimus": "The vidimus certified that the document was authentic.",
+    "archipelago": "Hawaii is an archipelago consisting of many islands.",
+    "pinioning": "The wrestler was pinioning his opponent to the mat.",
+    "galleon": "The Spanish galleon was loaded with gold coins.",
+    "wainscoting": "The dining room features elegant oak wainscoting.",
+    "warlock": "The warlock cast a dark spell.",
+    "dimensional": "We watched a three dimensional movie with special glasses.",
+    "Everest": "Mount Everest is the highest peak in the world.",
+    "marauder": "The masked marauder stole valuable jewels.",
+    "deferential": "The waiter was very deferential to the customers.",
+    "opalescent": "The soap bubble had an opalescent surface.",
+    "talcum": "She dusted the baby with soft talcum powder.",
+    "plaited": "She plaited her long hair into a braid.",
+    "prestigious": "Harvard is a very prestigious university.",
+    "lo mein": "I ordered chicken lo mein from the Chinese restaurant.",
+    "psyche": "Fear can damage a person's psyche.",
+    "schema": "The architect drew a schema of the building.",
+    "delphine": "The delphine pottery had a beautiful blue color.",
+    "serape": "He wore a colorful Mexican serape over his shoulders.",
+    "chignon": "She wore her hair in a stylish chignon at the back of her head.",
+    "magnanimous": "The winner was magnanimous and shook hands with the loser.",
+    "Nehru": "He wore a Nehru jacket with a mandarin collar.",
+    "colossus": "The statue was a colossus that towered over the harbor.",
+    "garishly": "The room was painted garishly in bright orange and purple.",
+    "dexterity": "Magicians need great manual dexterity for card tricks.",
+    "conscience": "His conscience told him to return the lost wallet.",
+    "albatross": "The albatross is a large seabird with a huge wingspan.",
+    "asphalt": "The road crews laid fresh asphalt on the highway.",
+    "tranquilizer": "The vet used a tranquilizer to calm the lion.",
+    "monsieur": "The waiter addressed him as Monsieur.",
+    "fraidycat": "Don't be a fraidycat, jump in the pool!",
+    "courier": "The courier delivered the package by bike.",
+    "stucco": "The house had a white stucco exterior.",
+    "et cetera": "Bring pens, paper, pencils, et cetera.",
+    "slough": "Snakes slough their skin as they grow.",
+    "puissance": "The horse showed great puissance in the jumping competition.",
+    "pheromone": "Insects use a pheromone to attract mates.",
+    "chartreuse": "She wore a bright chartreuse dress to the party."
 };
 
 // --- Game State Constants ---
@@ -507,11 +709,8 @@ class Game {
         this.dom.input.value = "";
         this.dom.input.focus();
 
-        // Level-specific setup
-        if (this.level >= 3) {
-            // Audio only mode - Auto-speak
-            setTimeout(() => this.speakWord(), 500);
-        }
+        // Always auto-speak the word at start
+        setTimeout(() => this.speakWord(), 500);
 
         this.state = STATES.PLAYING;
     }
@@ -675,10 +874,15 @@ class Game {
     }
 
     speakDefinition() {
-        let text = DEFINITIONS[this.currentWord];
+        let text = SENTENCES[this.currentWord];
         if (!text) text = `Spell the word ${this.currentWord}.`;
         
-        const u = new SpeechSynthesisUtterance(text);
+        // Replace target word with "blank" for the spoken audio
+        // Regex to match case-insensitive word boundaries
+        const regex = new RegExp(`\\b${this.currentWord}\\b`, 'gi');
+        const spokenText = text.replace(regex, "blank");
+
+        const u = new SpeechSynthesisUtterance(spokenText);
         window.speechSynthesis.speak(u);
         this.dom.input.focus();
     }
