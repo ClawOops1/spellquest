@@ -115,7 +115,7 @@
     <div id="lvl-up-screen" onclick="closeLvlUp()">
         <h1 style="font-size:24px;">LEVEL UP!</h1>
         <div id="lvl-up-icon" style="font-size:80px; margin:20px;">⚡</div>
-        <p id="lvl-up-msg">You evolved to Grade 4 words!</p>
+        <p id="lvl-up-msg">You evolved! Harder words await!</p>
         <p style="font-size:8px; margin-top:30px;">(Tap to continue)</p>
     </div>
 
@@ -129,38 +129,40 @@
             2: [
                 {w:"incredible", s:"That was an incredible jump!"}, {w:"gorgeous", s:"The sunset looks gorgeous."},
                 {w:"avocado", s:"I like avocado on toast."}, {w:"dinosaur", s:"The dinosaur is very big."},
-                {w:"surprise", s:"The party was a surprise!"}, {w:"dangerous", s:"The fire is dangerous."}
+                {w:"surprise", s:"The party was a surprise!"}, {w:"dangerous", s:"The fire is dangerous."},
+                {w:"especially", s:"I love fruit, especially apples."}, {w:"elephant", s:"An elephant has a trunk."}
             ],
             3: [
-                {w:"mysterious", s:"The dark house is mysterious."}, {w:"fragile", s:"The glass vase is fragile."},
-                {w:"discovery", s:"He made a great discovery."}, {w:"enormous", s:"The whale is enormous."},
-                {w:"scavenger", s:"A raccoon is a scavenger."}
+                {w:"mysterious", s:"The dark house is mysterious."}, {w:"discovery", s:"He made a great discovery."},
+                {w:"enormous", s:"The whale is enormous."}, {w:"scavenger", s:"A raccoon is a scavenger."},
+                {w:"frustration", s:"He sighed in frustration."}, {w:"nautical", s:"The room has a nautical theme."}
             ]
         };
 
         let s = {
-            lvl: 1, xp: 0, energy: 0, streak: 0, hp: 100, mHp: 100, lives: 3,
-            wordIdx: 0, typed: "", current: null,
+            lvl: 1, xp: 0, energy: 0, hp: 100, mHp: 100, lives: 3,
+            busy: false, typed: "", current: null,
             monsters: ["👾", "👹", "🐉", "👻", "🦇", "🐺", "💀"]
         };
 
-        function speak(t, callback) {
+        function speak(t, cb) {
             window.speechSynthesis.cancel();
             const m = new SpeechSynthesisUtterance(t);
             m.rate = 0.85;
-            if (callback) m.onend = callback;
+            if (cb) m.onend = cb;
             window.speechSynthesis.speak(m);
         }
 
         function focusInput() { document.getElementById('mobile-input').focus(); }
 
         function nextWord() {
+            s.busy = false;
             const list = ALL_WORDS[Math.min(s.lvl, 3)];
             s.current = list[Math.floor(Math.random() * list.length)];
             s.typed = "";
             s.mHp = 100;
-            updateUI();
-
+            s.hp = 100;
+            
             const display = document.getElementById('word-display');
             display.innerHTML = "";
             for(let char of s.current.w) {
@@ -171,41 +173,40 @@
             }
 
             const hint = document.getElementById('hint-text');
-            if (s.lvl === 1) {
-                hint.innerText = "LOOK: " + s.current.w.toUpperCase();
-            } else if (s.lvl === 2) {
-                hint.innerText = "HINT: Starts with " + s.current.w[0].toUpperCase();
-            } else {
-                hint.innerText = "LISTEN CLOSELY...";
-            }
+            if (s.lvl === 1) hint.innerText = "LOOK: " + s.current.w.toUpperCase();
+            else if (s.lvl === 2) hint.innerText = "HINT: Starts with " + s.current.w[0].toUpperCase();
+            else hint.innerText = "LISTEN CLOSELY...";
 
-            // Ensure sound plays on start after a short delay
-            setTimeout(() => {
-                speak(s.current.w);
-            }, 500);
+            updateUI();
+            setTimeout(() => { speak(s.current.w); }, 500);
         }
 
         function updateUI() {
             document.getElementById('hero-hp').style.width = s.hp + "%";
-            const mHpBar = document.getElementById('monster-hp');
-            if (mHpBar) mHpBar.style.width = s.mHp + "%";
+            const mhp = document.getElementById('monster-hp');
+            if (mhp) mhp.style.width = s.mHp + "%";
             
             document.getElementById('energy-fill').style.width = s.energy + "%";
             document.getElementById('xp-val').innerText = s.xp;
             document.getElementById('lvl-val').innerText = s.lvl;
             document.getElementById('lives-val').innerText = "❤️".repeat(s.lives);
             
-            if (s.lvl === 2) {
-                document.getElementById('game-stage').style.background = "linear-gradient(to bottom, #134e5e, #71b280)";
-                document.getElementById('hero').innerText = "🐝✨";
-            } else if (s.lvl >= 3) {
-                document.getElementById('game-stage').style.background = "linear-gradient(to bottom, #4b6cb7, #182848)";
-                document.getElementById('hero').innerText = "🐝👑";
+            const stage = document.getElementById('game-stage');
+            const hero = document.getElementById('hero');
+            if (s.lvl === 1) {
+                stage.style.background = "linear-gradient(to bottom, #0d0221, #240b36)";
+                hero.innerText = "🐝";
+            } else if (s.lvl === 2) {
+                stage.style.background = "linear-gradient(to bottom, #134e5e, #71b280)";
+                hero.innerText = "🐝✨";
+            } else {
+                stage.style.background = "linear-gradient(to bottom, #4b6cb7, #182848)";
+                hero.innerText = "🐝👑";
             }
         }
 
         function handleInput(char) {
-            if (s.hp <= 0 || s.mHp <= 0) return;
+            if (s.busy || s.hp <= 0 || s.mHp <= 0) return;
             const expected = s.current.w[s.typed.length].toLowerCase();
             const input = char.toLowerCase();
             const boxes = document.querySelectorAll('.letter-box');
@@ -216,7 +217,6 @@
                 s.typed += char;
                 speak(char);
                 
-                // Hero Attack
                 document.getElementById('hero').style.transform = "scale(1.3) translateX(40px)";
                 setTimeout(() => document.getElementById('hero').style.transform = "scale(1) translateX(0)", 150);
                 
@@ -224,27 +224,26 @@
                 updateUI();
 
                 if (s.typed.length === s.current.w.length) {
-                    setTimeout(victory, 500);
+                    s.busy = true;
+                    setTimeout(victory, 600);
                 }
             } else if (/^[a-z]$/i.test(char)) {
-                s.streak = 0;
                 boxes[s.typed.length].classList.add('wrong');
                 setTimeout(() => boxes[s.typed.length].classList.remove('wrong'), 200);
                 
-                // Monster Counter-Attack
                 document.getElementById('monster').style.transform = "scale(1.3) translateX(-40px)";
                 setTimeout(() => document.getElementById('monster').style.transform = "scale(1) translateX(0)", 150);
                 
                 s.hp -= 20;
                 updateUI();
-                speak("No!");
+                speak("No");
                 
                 if (s.hp <= 0) {
                     if (s.lives > 1) {
                         s.lives--;
                         s.hp = 100;
                         updateUI();
-                        speak("Heart used! Keep going!");
+                        speak("Heart used!");
                     } else {
                         s.lives = 0;
                         updateUI();
@@ -255,10 +254,8 @@
         }
 
         function victory() {
-            if (s.mHp > 0) return; // Guard against multiple triggers
             s.xp += 10;
             s.energy += 25;
-            s.streak++;
             speak("Correct! " + s.current.w);
             
             if (s.energy >= 100) {
@@ -267,18 +264,17 @@
                 setTimeout(showLvlUp, 500);
             } else {
                 setTimeout(() => {
-                    const nextMonster = s.monsters[Math.floor(Math.random()*s.monsters.length)];
-                    document.getElementById('monster').innerText = nextMonster;
-                    document.getElementById('monster').innerHTML += '<div class="hp-bar-container"><div id="monster-hp" class="hp-fill"></div></div>';
+                    const m = document.getElementById('monster');
+                    m.innerText = s.monsters[Math.floor(Math.random()*s.monsters.length)];
+                    m.innerHTML += '<div class="hp-bar-container"><div id="monster-hp" class="hp-fill"></div></div>';
                     nextWord();
                 }, 1200);
             }
         }
 
         function showLvlUp() {
-            document.getElementById('lvl-up-msg').innerText = "Level " + s.lvl + " Unlocked! New words and harder challenges await!";
             document.getElementById('lvl-up-screen').style.display = 'flex';
-            speak("Level Up! You are getting stronger!");
+            speak("Level Up!");
         }
 
         function closeLvlUp() {
@@ -288,13 +284,7 @@
 
         function gameOver() {
             alert("GAME OVER! Back to Level 1.");
-            s.hp = 100;
-            s.lvl = 1;
-            s.lives = 3;
-            s.xp = 0;
-            s.energy = 0;
-            document.getElementById('game-stage').style.background = "linear-gradient(to bottom, #0d0221, #240b36)";
-            document.getElementById('hero').innerText = "🐝";
+            s.hp = 100; s.lvl = 1; s.lives = 3; s.xp = 0; s.energy = 0;
             nextWord();
         }
 
@@ -304,18 +294,14 @@
         function peekWord() {
             if (s.xp >= 10) {
                 s.xp -= 10;
-                const nextChar = s.current.w[s.typed.length];
-                speak("The next letter is " + nextChar);
+                speak("Next is " + s.current.w[s.typed.length]);
                 updateUI();
-            } else {
-                speak("Not enough XP!");
             }
         }
 
         document.getElementById('mobile-input').addEventListener('input', (e) => {
-            const v = e.target.value;
-            if (v.length > 0) {
-                handleInput(v[v.length - 1]);
+            if (e.target.value.length > 0) {
+                handleInput(e.target.value[e.target.value.length - 1]);
                 e.target.value = "";
             }
         });
